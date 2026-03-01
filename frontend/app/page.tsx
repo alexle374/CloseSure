@@ -54,6 +54,7 @@ export default function Home() {
           <HomeIcon className="h-5 w-5" />
           Inspector AI
         </Link>
+<<<<<<< HEAD
         <div className="flex items-baseline gap-4">
           <Link
             href="/about"
@@ -66,6 +67,14 @@ export default function Home() {
             className="text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
           >
             Login
+=======
+        <div className="flex items-center gap-2">
+          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
+            Log in
+          </Link>
+          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
+            Sign in
+>>>>>>> 0c9a699d5b663ff32224b99b9fc280ada1b0290d
           </Link>
         </div>
       </nav>

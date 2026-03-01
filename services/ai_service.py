@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash-lite")
 
 # normalize model name (allow "models/..." or "gemini-...")
 model = GEMINI_MODEL
@@ -29,6 +29,8 @@ Rules:
 - Never claim certainty. Use: "may", "could", "suggests", "verify".
 - Permits are signals, not proof of quality. READ the full work_description of each permit—do not generalize or sanitize. If work_description mentions "garage", "conversion", "detached garage", "ADU", etc., the summary MUST include that (e.g. "permits show a garage conversion was done"). Do not reduce "garage conversion" to just "roof" or "kitchen"—the conversion is the key finding. Cite issue_date and a short phrase from work_description when referencing permits.
 - Keep list items SHORT. The summary may be 2–3 sentences for a more comprehensive overview.
+- When the user has indicated an ADU/garage conversion/guest house (adu_claimed), refer to it inclusively: say "ADU, garage conversion, or guest house" (or similar) rather than only "ADU" or "ADU is claimed."
+- When BOTH the listing indicates an ADU/garage conversion/guest house (adu_claimed) AND the permit data shows it (permit_confirms_adu_or_conversion is true, or permit_summary.adu_or_conversion_detected is true, or permit_records/permit_highlights mention garage conversion or ADU), you MUST state: "The listing indicates a garage conversion [or ADU/guest house], and a permit confirms it; the work was likely permitted and there was most likely no unpermitted work." Do NOT say "permits do not confirm" or "no specific permits found" when permit_confirms_adu_or_conversion is true or when permit_records clearly describe garage/conversion/ADU work. Include this in the summary and as a good_point.
 - The disclaimer MUST state that this is a brief description based on limited public data and recommend a professional inspection.
 
 Things to look out for (based on estimated age and permit context):
@@ -58,7 +60,7 @@ Return ONLY valid JSON with this exact schema:
 }
 
 Hard limits:
-- summary: 2–3 sentences. MUST include what the permits actually say—e.g. if work_description says "garage conversion" or "Re-roof with House and Detached Garage", state that the garage was likely converted and has permits for it. Include any user/permit discrepancies.
+- summary: 2–3 sentences. If listing indicates ADU/garage conversion/guest house AND permits confirm it (e.g. garage conversion in work_description), say "The listing indicates a garage conversion [or ADU/guest house], and a permit confirms it; the work was likely permitted." Otherwise use "ADU, garage conversion, or guest house" for user indication. Include any user/permit discrepancies.
 - good_points: exactly 5 items, each <= 120 characters.
 - bad_points: exactly 5 items, each <= 120 characters.
 - questions_to_ask: exactly 5 items, each <= 120 characters.
@@ -69,10 +71,21 @@ If you cannot find enough permit evidence, use construction-era risks based on y
 
 def compact_ready_for_ai(ready_for_ai: Dict[str, Any]) -> Dict[str, Any]:
     permits = ready_for_ai.get("permit_records", []) or []
-    # sort by issue_date descending (string ISO sorts ok)
     permits = sorted(permits, key=lambda p: p.get("issue_date") or "", reverse=True)
+    # Always include any permit tagged as Garage Conversion or ADU, then fill with most recent up to 15
+    conversion_cats = {"Garage Conversion", "ADU / Second Unit"}
+    conversion_permits = [p for p in permits if conversion_cats & set(p.get("categories") or [])]
+    rest = [p for p in permits if p not in conversion_permits]
+    ordered = conversion_permits + rest
     permits_compact = []
-    for p in permits[:10]:
+    seen = set()
+    for p in ordered:
+        if len(permits_compact) >= 15:
+            break
+        key = (p.get("pcis_permit"), p.get("issue_date"))
+        if key in seen:
+            continue
+        seen.add(key)
         permits_compact.append({
             "pcis_permit": p.get("pcis_permit"),
             "issue_date": p.get("issue_date"),
@@ -80,17 +93,22 @@ def compact_ready_for_ai(ready_for_ai: Dict[str, Any]) -> Dict[str, Any]:
             "permit_sub_type": p.get("permit_sub_type"),
             "work_description": p.get("work_description"),
             "valuation": p.get("valuation"),
+            "categories": p.get("categories"),
         })
+
+    flags = ready_for_ai.get("permit_summary") or {}
+    permit_confirms_conversion = flags.get("adu_or_conversion_detected") is True
 
     return {
         "property": ready_for_ai.get("property"),
         "year_built": ready_for_ai.get("year_built"),
         "estimated_age": ready_for_ai.get("estimated_age"),
         "adu_claimed": ready_for_ai.get("adu_claimed"),
-        "permit_summary": ready_for_ai.get("permit_summary"),
+        "permit_summary": flags,
         "permit_highlights": ready_for_ai.get("permit_highlights"),
         "permit_records": permits_compact,
-        "note": "Permit records are truncated to the most recent 10 for summarization."
+        "permit_confirms_adu_or_conversion": permit_confirms_conversion,
+        "note": "Permit records include conversion-related permits first, then most recent (up to 15)."
     }
 
 
