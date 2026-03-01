@@ -38,23 +38,65 @@
     opacity: 0;
   }
 
-  /* Fade-in for inspection inputs page */
+  /* Staggered entrance for address/search page */
+  .page-enter {
+    animation: pageSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .page-enter-delay-1 {
+    animation: pageSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  }
+  .page-enter-delay-2 {
+    animation: pageSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  }
+  .page-enter-delay-3 {
+    animation: pageSlideUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.36s both;
+  }
+  @keyframes pageSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Background shimmer sweep on address page load */
+  .page-bg-shimmer::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.55) 0%,
+      rgba(186,218,240,0.18) 50%,
+      transparent 100%
+    );
+    animation: bgShimmer 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes bgShimmer {
+    from { opacity: 0; transform: translateX(-8%) skewX(-4deg); }
+    40%  { opacity: 1; }
+    to   { opacity: 0; transform: translateX(108%) skewX(-4deg); }
+  }
+
+  /* Legacy fade-in kept for backward compat */
   .inspection-fade-in {
     animation: inspectionFadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
   @keyframes inspectionFadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
   }
 
-  /* Simple background for flow pages (no landing image) */
+  /* Background for flow pages — deeper blue-slate gradient for contrast */
   .app-flow-bg {
-    background: linear-gradient(180deg, #f0f6fc 0%, #e8f0f8 50%, #f5f9fc 100%);
+    background:
+      radial-gradient(ellipse 80% 55% at 20% 10%, rgba(110,160,210,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 45% at 80% 85%, rgba(80,130,190,0.14) 0%, transparent 55%),
+      linear-gradient(180deg, #daeaf7 0%, #c8dff0 40%, #d6e8f4 100%);
   }
 }

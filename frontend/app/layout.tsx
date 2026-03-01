@@ -15,8 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Inspector AI | Your Personal Home Inspector",
-  description: "AI-powered home risk analysis for homeowners.",
+  title: "CloseSure | Your AI Home Inspector",
+  description: "AI-powered inspection report generator for homeowners.",
+  icons: { icon: "/logo.png" },
 };
 
 export default function RootLayout({

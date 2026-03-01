@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TypingHeadline from "@/components/TypingHeadline";
-import HomeIcon from "@/components/HomeIcon";
 
 const ZOOM_DURATION_MS = 1100;
 
@@ -63,7 +62,7 @@ export default function Home() {
           href="/"
           className="flex items-center gap-2 font-serif text-xl font-semibold tracking-tight text-neutral-800"
         >
-          <HomeIcon className="h-5 w-5" />
+          <img src="/logo.png" alt="CloseSure logo" className="h-5 w-5" />
           CloseSure
         </Link>
         <div className="flex items-baseline gap-4">

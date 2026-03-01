@@ -29,6 +29,7 @@ function ReportContent() {
   const yearBuilt = searchParams.get("year_built") ?? "0";
   const aduClaimed = searchParams.get("adu_claimed") === "true";
 
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [hoveredGood, setHoveredGood] = useState<number | null>(null);
   const [hoveredBad, setHoveredBad] = useState<number | null>(null);
   const [inViewSections, setInViewSections] = useState<Set<string>>(new Set());
@@ -56,17 +57,13 @@ function ReportContent() {
         adu_claimed: aduClaimed,
       }),
     })
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          const msg = (data.detail ?? data.message ?? `Server error: ${res.status}`).toString();
-          throw new Error(msg);
-        }
-        return data;
+      .then((res) => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
       })
       .then((data: ReportData) => {
         if (data.status === "UNSUPPORTED_CITY") {
-          setError("Sorry, this city is not supported yet. Only Los Angeles addresses are currently supported.");
+          setError("Unsupported city. Permit lookup is only available for addresses within: Los Angeles (LA), Chicago, San Francisco, San Diego County, Seattle, and New York City.");
         } else {
           const normalize = (pts: unknown[]) =>
             pts.map((p) => (typeof p === "string" ? { text: p } : p as { text: string; detail?: string }));
@@ -110,14 +107,49 @@ function ReportContent() {
   const inView = (id: string) => inViewSections.has(id);
 
   return (
-    <div className="relative min-h-screen overflow-hidden app-flow-bg">
+    <div
+      className="relative min-h-screen overflow-hidden"
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+        const y = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+        setMouse({ x, y });
+      }}
+      onMouseLeave={() => setMouse({ x: 0, y: 0 })}
+    >
+      {/* Background image */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-200 ease-out will-change-transform"
+        style={{
+          backgroundImage: "url(/landingbkg.png)",
+          transform: `translate3d(${mouse.x * 8}px, ${mouse.y * 8}px, 0) scale(1.03)`,
+        }}
+      />
+
+      {/* Depth glow layer */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[1] transition-transform duration-200 ease-out will-change-transform"
+        style={{
+          transform: `translate3d(${mouse.x * 16}px, ${mouse.y * 16}px, 0)`,
+          background:
+            "radial-gradient(circle at 30% 30%, rgba(122,170,206,0.22), transparent 45%), radial-gradient(circle at 75% 70%, rgba(93,149,189,0.18), transparent 45%)",
+        }}
+        aria-hidden
+      />
+
+      {/* Overlay for readability */}
+      <div
+        className="fixed inset-0 z-[2] bg-gradient-to-b from-white/75 via-white/35 to-transparent"
+        aria-hidden
+      />
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 lg:px-12">
         <Link
           href="/"
           className="flex items-center gap-2 font-serif text-xl font-semibold tracking-tight text-neutral-800"
         >
-          <HomeIcon className="h-5 w-5" />
+          <img src="/logo.png" alt="CloseSure logo" className="h-5 w-5" />
           CloseSure
         </Link>
         <div className="flex items-baseline gap-4">

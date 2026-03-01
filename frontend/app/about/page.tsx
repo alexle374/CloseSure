@@ -2,17 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import HomeIcon from "@/components/HomeIcon";
 
 const PERSPECTIVE = 1200;
 const ANIM_DURATION = 700;
 const STAGGER = 120;
 
 const FOUNDERS = [
-  { name: "Alex Le", linkedin: "https://www.linkedin.com/in/alexml23/" },
-  { name: "Angelina Ly", linkedin: "https://www.linkedin.com/in/angelinawly/" },
-  { name: "Conner Ng", linkedin: "https://www.linkedin.com/in/ngconnor/" },
-  { name: "Christian Raya", linkedin: "https://www.linkedin.com/in/christianraya/" },
+  { name: "Alex Le",       linkedin: "https://www.linkedin.com/in/alexml23/",     image: "/founders/alex.jpg" },
+  { name: "Angelina Ly",   linkedin: "https://www.linkedin.com/in/angelinawly/",  image: "/founders/angelina.png" },
+  { name: "Conner Ng",     linkedin: "https://www.linkedin.com/in/ngconnor/",     image: "/founders/connor.png" },
+  { name: "Christian Raya",linkedin: "https://www.linkedin.com/in/christianraya/",image: "/founders/christian.jpg" },
 ];
 
 function useScrollVisibility(threshold = 0.15) {
@@ -85,7 +84,7 @@ export default function AboutPage() {
           href="/"
           className="flex items-center gap-2 font-serif text-xl font-semibold tracking-tight text-neutral-800"
         >
-          <HomeIcon className="h-5 w-5" />
+          <img src="/logo.png" alt="CloseSure logo" className="h-5 w-5" />
           CloseSure
         </Link>
         <div className="flex items-baseline gap-4">
@@ -167,9 +166,10 @@ export default function AboutPage() {
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center rounded-2xl border border-neutral-200/80 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 ease-out hover:scale-[1.02] hover:border-neutral-300 hover:bg-white/80 hover:shadow-lg hover:shadow-neutral-200/50"
                 >
-                  <div
-                    className="h-24 w-24 shrink-0 rounded-full bg-neutral-200/90 object-cover"
-                    aria-hidden
+                  <img
+                    src={f.image}
+                    alt={f.name}
+                    className="h-24 w-24 shrink-0 rounded-full object-cover bg-neutral-200/90"
                   />
                   <p className="mt-4 font-sans font-medium text-neutral-900 group-hover:text-neutral-700">
                     {f.name}
