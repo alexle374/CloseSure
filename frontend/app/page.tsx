@@ -2,15 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import TypingHeadline from "@/components/TypingHeadline";
 import HomeIcon from "@/components/HomeIcon";
 
+const ZOOM_DURATION_MS = 1100;
+
 export default function Home() {
+  const router = useRouter();
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [isZooming, setIsZooming] = useState(false);
+
+  function handleStartInspection() {
+    setIsZooming(true);
+    setTimeout(() => {
+      router.push("/address");
+    }, ZOOM_DURATION_MS);
+  }
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden"
+      className={`relative min-h-screen overflow-hidden zoom-into-center ${isZooming ? "zoom-active" : ""}`}
       onMouseMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
         const x = (e.clientX - (r.left + r.width / 2)) / (r.width / 2); // -1..1
@@ -76,12 +88,14 @@ export default function Home() {
         <p className="mt-4 max-w-xl font-sans text-base text-neutral-600 sm:text-lg">
           AI-powered home risk analysis for homeowners.
         </p>
-        <Link
-          href="/address"
-          className="glass-button glass-button-primary mt-6 px-6 py-1.5 text-base font-medium"
+        <button
+          type="button"
+          onClick={handleStartInspection}
+          disabled={isZooming}
+          className="glass-button glass-button-primary mt-6 px-6 py-1.5 text-base font-medium disabled:pointer-events-none"
         >
           Start your inspection
-        </Link>
+        </button>
       </main>
     </div>
   );

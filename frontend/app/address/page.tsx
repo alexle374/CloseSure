@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HomeIcon from "@/components/HomeIcon";
@@ -17,7 +17,8 @@ const ADU_TYPES = [
 
 export default function AddressPage() {
   const router = useRouter();
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [form, setForm] = useState({
     street: "",
@@ -70,43 +71,7 @@ export default function AddressPage() {
   }
 
   return (
-    <div
-      className="relative min-h-screen overflow-hidden"
-      onMouseMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        setMouse({
-          x: (e.clientX - (r.left + r.width / 2)) / (r.width / 2),
-          y: (e.clientY - (r.top + r.height / 2)) / (r.height / 2),
-        });
-      }}
-      onMouseLeave={() => setMouse({ x: 0, y: 0 })}
-    >
-      {/* Background */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-200 ease-out will-change-transform"
-        style={{
-          backgroundImage: "url(/landingbkg.png)",
-          transform: `translate3d(${mouse.x * 8}px, ${mouse.y * 8}px, 0) scale(1.03)`,
-        }}
-      />
-
-      {/* Depth glow */}
-      <div
-        className="pointer-events-none fixed inset-0 z-[1] transition-transform duration-200 ease-out will-change-transform"
-        style={{
-          transform: `translate3d(${mouse.x * 16}px, ${mouse.y * 16}px, 0)`,
-          background:
-            "radial-gradient(circle at 30% 30%, rgba(122,170,206,0.22), transparent 45%), radial-gradient(circle at 75% 70%, rgba(93,149,189,0.18), transparent 45%)",
-        }}
-        aria-hidden
-      />
-
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-[2] bg-gradient-to-b from-white/75 via-white/35 to-transparent"
-        aria-hidden
-      />
-
+    <div className="relative min-h-screen overflow-hidden app-flow-bg">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 lg:px-12">
         <Link
@@ -132,9 +97,9 @@ export default function AddressPage() {
         </div>
       </nav>
 
-      {/* Main */}
+      {/* Main — fade in after zoom transition from home */}
       <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pb-16 pt-28 sm:px-6">
-        <div className="w-full max-w-2xl">
+        <div className={`w-full max-w-2xl ${mounted ? "inspection-fade-in" : "opacity-0"}`}>
           {/* Heading */}
           <div className="mb-8 text-center">
             <h1 className="font-serif text-4xl font-semibold tracking-tight text-neutral-800 sm:text-5xl">
