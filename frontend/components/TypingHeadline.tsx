@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 const FULL_TEXT =
-  "Your personal home inspector\nright at your f\u2009ingertips.";
+  "Your personal home inspector\nright at your fingertips.";
 const TYPING_SPEED = 45;
 const CURSOR_BLINK_SPEED = 530;
 

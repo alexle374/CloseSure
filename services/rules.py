@@ -4,7 +4,11 @@ from collections import Counter
 
 RULES = [
     ("ADU / Second Unit", [r"\bADU\b", r"\bJADU\b", r"ACCESSORY\s+DWELL", r"\bSECOND\s+UNIT\b", r"\bGUEST\s+HOUSE\b"]),
-    ("Garage Conversion", [r"GARAGE\s+CONVERS", r"\bCONVERT(ED|)\b.*\bGARAGE\b", r"\bCHANGE\s+OF\s+USE\b", r"\bDWELLING\s+UNIT(S)?\b"]),
+    ("Garage Conversion", [
+        r"GARAGE\s+CONVERS", r"\bCONVERT(ED|ING|)\b.*\bGARAGE\b", r"\bGARAGE\b.*\bCONVERT",
+        r"\bCHANGE\s+OF\s+USE\b", r"\bDWELLING\s+UNIT(S)?\b",
+        r"CONVERS(ION|)\b.*\bGARAGE\b", r"\bGARAGE\b.*\bCONVERS", r"DETACHED\s+GARAGE.*(CONVERS|CONVERT|DWELLING)",
+    ]),
     ("Accessory Structure", [r"\bACCESSORY\s+STRUCT", r"\bOUTBUILDING\b", r"\bSHED\b"]),
     ("Recreation Room", [r"\bREC(\.|)?\s*ROOM\b", r"\bRECREATION\s+ROOM\b", r"\bGAME\s+ROOM\b"]),
     ("Pool House", [r"POOL\s+HOUSE", r"\bCABANA\b"]),

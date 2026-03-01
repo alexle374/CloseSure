@@ -116,10 +116,10 @@ export default function AddressPage() {
           Inspector AI
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/login" className="glass-button px-4 py-1 text-sm font-medium">
+          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
             Log in
           </Link>
-          <Link href="/signup" className="glass-button px-4 py-1 text-sm font-medium">
+          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
             Sign in
           </Link>
         </div>

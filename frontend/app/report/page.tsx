@@ -5,10 +5,12 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import HomeIcon from "@/components/HomeIcon";
 
-const NEARBY_INSPECTORS = [
-  { name: "ABC Home Inspections", phone: "(555) 123-4567", rating: "4.5" },
-  { name: "SoCal Inspect Pro", phone: "(555) 987-6543", rating: "4.5" },
-];
+type NearbyInspector = {
+  name: string;
+  rating: number | null;
+  distance_miles: number | null;
+  address: string;
+};
 
 type ReportData = {
   status: string;
@@ -17,6 +19,8 @@ type ReportData = {
   bad_points: { text: string; detail?: string }[];
   questions_to_ask: string[];
   disclaimer?: string;
+  nearby_inspectors?: NearbyInspector[];
+  nearby_inspectors_note?: string | null;
 };
 
 function ReportContent() {
@@ -61,7 +65,13 @@ function ReportContent() {
         if (data.status === "UNSUPPORTED_CITY") {
           setError("Sorry, this city is not supported yet. Only Los Angeles addresses are currently supported.");
         } else {
-          setReport(data);
+          const normalize = (pts: unknown[]) =>
+            pts.map((p) => (typeof p === "string" ? { text: p } : p as { text: string; detail?: string }));
+          setReport({
+            ...data,
+            good_points: normalize(data.good_points ?? []),
+            bad_points: normalize(data.bad_points ?? []),
+          });
         }
       })
       .catch((err: Error) => {
@@ -143,7 +153,7 @@ function ReportContent() {
           Inspector AI
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/login" className="glass-button px-4 py-1 text-sm font-medium">
+          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
             Log in
           </Link>
           <Link href="/address" className="glass-button px-4 py-1 text-sm font-medium">
@@ -460,11 +470,6 @@ function ReportContent() {
                         {i + 1}
                       </span>
                       <p className="flex-1 text-neutral-700">{question}</p>
-                      {i === 0 && (
-                        <span className="shrink-0 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700">
-                          {report.questions_to_ask.length} questions
-                        </span>
-                      )}
                     </div>
                   </li>
                 ))}
@@ -472,57 +477,85 @@ function ReportContent() {
             </section>
 
             {/* Nearby Inspection Companies */}
-            <section
-              data-section="nearby"
-              className={`group/nearby mb-16 transition-all duration-500 ease-out ${
-                inView("nearby") ? "in-view translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-              }`}
-            >
-              <h2 className="mb-8 flex items-center gap-3 text-xl font-bold text-neutral-900">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </span>
-                Nearby Inspection Companies
-              </h2>
-              <div className="grid gap-6 sm:grid-cols-2">
-                {NEARBY_INSPECTORS.map((company, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-white/40 bg-white/70 p-6 backdrop-blur-md opacity-0 translate-y-2 transition-all duration-300 ease-out group-[.in-view]/nearby:opacity-100 group-[.in-view]/nearby:translate-y-0 hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
-                    style={{ transitionDelay: `${i * 75}ms` }}
-                  >
-                    <h3 className="mb-2 font-bold text-neutral-900">{company.name}</h3>
-                    <p className="mb-2 text-sm text-neutral-600">{company.phone}</p>
-                    <p className="mb-5 flex items-center gap-1.5 text-sm text-neutral-600">
-                      <svg className="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                      {company.rating} rating
-                    </p>
-                    <button
-                      type="button"
-                      className="glass-button w-full px-5 py-2.5 text-sm font-medium"
-                    >
-                      Contact Company
-                    </button>
+            {((report.nearby_inspectors && report.nearby_inspectors.length > 0) || report.nearby_inspectors_note) && (
+              <section
+                data-section="nearby"
+                className={`group/nearby mb-16 transition-all duration-500 ease-out ${
+                  inView("nearby") ? "in-view translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+                }`}
+              >
+                <h2 className="mb-8 flex items-center gap-3 text-xl font-bold text-neutral-900">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </span>
+                  Nearby Home Inspectors
+                </h2>
+
+                {report.nearby_inspectors_note && !report.nearby_inspectors?.length && (
+                  <p className="text-sm text-neutral-500 italic">{report.nearby_inspectors_note}</p>
+                )}
+
+                {report.nearby_inspectors && report.nearby_inspectors.length > 0 && (
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    {report.nearby_inspectors.map((inspector, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col rounded-2xl border border-white/40 bg-white/70 p-6 backdrop-blur-md opacity-0 translate-y-2 transition-all duration-300 ease-out group-[.in-view]/nearby:opacity-100 group-[.in-view]/nearby:translate-y-0 hover:-translate-y-1 hover:shadow-[0_8px_28px_rgba(0,0,0,0.08)]"
+                        style={{ transitionDelay: `${i * 75}ms` }}
+                      >
+                        <h3 className="mb-3 font-bold text-neutral-900 leading-snug">{inspector.name}</h3>
+                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                          {inspector.rating != null && (
+                            <span className="flex items-center gap-1 text-sm text-neutral-600">
+                              <svg className="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                              {inspector.rating.toFixed(1)}
+                            </span>
+                          )}
+                          {inspector.distance_miles != null && (
+                            <span className="flex items-center gap-1 text-sm text-neutral-600">
+                              <svg className="h-4 w-4 text-[#7ba3c4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              </svg>
+                              {inspector.distance_miles} mi away
+                            </span>
+                          )}
+                        </div>
+                        {inspector.address && (
+                          <p className="mb-4 text-xs text-neutral-500 leading-relaxed">{inspector.address}</p>
+                        )}
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(inspector.name + " home inspector")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="glass-button mt-auto w-full px-5 py-2.5 text-sm font-medium text-center"
+                        >
+                          Search on Google
+                        </a>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                )}
+              </section>
+            )}
 
             {/* Action Buttons */}
             <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
-              <button
-                type="button"
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent("home inspectors near " + address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="glass-button glass-button-primary inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-medium"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Find More Inspectors
-              </button>
+              </a>
               <Link
                 href="/address"
                 className="inline-flex items-center justify-center gap-2 rounded-3xl border border-white/20 bg-white/60 px-8 py-3.5 text-sm font-medium text-[#5a8ab0] backdrop-blur-md transition-all duration-300 ease-in-out hover:bg-white/80"
