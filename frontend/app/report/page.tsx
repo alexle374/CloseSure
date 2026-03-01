@@ -156,7 +156,7 @@ function ReportContent() {
           <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
             Log in
           </Link>
-          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
+          <Link href="/address" className="glass-button px-4 py-1 text-sm font-medium">
             New Inspection
           </Link>
         </div>
