@@ -48,6 +48,7 @@ export default function AddressPage() {
     if (!form.city.trim()) e.city = "City is required.";
     if (!form.state.trim()) e.state = "State is required.";
     if (!/^\d{5}(-\d{4})?$/.test(form.zip.trim())) e.zip = "Enter a valid ZIP code.";
+    if (!form.yearBuilt.trim()) e.yearBuilt = "Year built is required.";
     if (form.yearBuilt && !/^\d{4}$/.test(form.yearBuilt.trim()))
       e.yearBuilt = "Enter a 4-digit year.";
     return e;
@@ -78,14 +79,20 @@ export default function AddressPage() {
           className="flex items-center gap-2 font-serif text-xl font-semibold tracking-tight text-neutral-800"
         >
           <HomeIcon className="h-5 w-5" />
-          Inspector AI
+          CloseSure
         </Link>
-        <div className="flex items-center gap-2">
-          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
-            Log in
+        <div className="flex items-baseline gap-4">
+          <Link
+            href="/about"
+            className="text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
+          >
+            About
           </Link>
-          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
-            Sign in
+          <Link
+            href=""
+            className="text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
+          >
+            Sign In
           </Link>
         </div>
       </nav>
@@ -209,7 +216,7 @@ export default function AddressPage() {
 
               <div className="max-w-[180px]">
                 <label className="mb-1.5 block text-sm font-medium text-neutral-700" htmlFor="yearBuilt">
-                  Year built <span className="font-normal text-neutral-400">(optional)</span>
+                  Year built
                 </label>
                 <input
                   id="yearBuilt"
@@ -270,35 +277,6 @@ export default function AddressPage() {
 
               {form.hasAdu && (
                 <div className="space-y-5 rounded-2xl border border-[#b8d4e8]/50 bg-white/50 p-5 backdrop-blur-sm">
-                  {/* Additional units Y/N */}
-                  <div>
-                    <p className="mb-3 text-sm font-medium text-neutral-700">
-                      Are there any additional units beyond the main home?
-                    </p>
-                    <div className="flex gap-3">
-                      {(["yes", "no"] as const).map((val) => (
-                        <label
-                          key={val}
-                          className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-5 py-2.5 text-sm font-medium transition ${
-                            form.additionalUnits === val
-                              ? "border-[#7ba3c4] bg-[#7ba3c4] text-white"
-                              : "border-white/50 bg-white/70 text-neutral-700 hover:border-[#7ba3c4]/50"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="additionalUnits"
-                            value={val}
-                            checked={form.additionalUnits === val}
-                            onChange={() => setForm((f) => ({ ...f, additionalUnits: val }))}
-                            className="sr-only"
-                          />
-                          {val === "yes" ? "Yes" : "No"}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* ADU type checkboxes */}
                   <div>
                     <p className="mb-3 text-sm font-medium text-neutral-700">

@@ -118,14 +118,20 @@ function ReportContent() {
           className="flex items-center gap-2 font-serif text-xl font-semibold tracking-tight text-neutral-800"
         >
           <HomeIcon className="h-5 w-5" />
-          Inspector AI
+          CloseSure
         </Link>
-        <div className="flex items-center gap-2">
-          <Link href="" className="glass-button px-4 py-1 text-sm font-medium">
-            Log in
+        <div className="flex items-baseline gap-4">
+          <Link
+            href="/about"
+            className="text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
+          >
+            About
           </Link>
-          <Link href="/address" className="glass-button px-4 py-1 text-sm font-medium">
-            New Inspection
+          <Link
+            href=""
+            className="text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900"
+          >
+            Sign In
           </Link>
         </div>
       </nav>
